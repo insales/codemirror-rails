@@ -70,14 +70,12 @@
     }
     return query;
   }
-  var queryDialog =
-    'Search: <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">(Use /re/ syntax for regexp search)</span>';
+
   function doSearch(cm, rev) {
     var state = getSearchState(cm);
     if (state.query) return findNext(cm, rev);
-    dialog(cm, queryDialog, "Search for:", cm.getSelection(), function(query) {
+    dialog(cm, CodeMirror.queryDialog(), "Search for:", cm.getSelection(), function(query) {
       cm.operation(function() {
-        if (!query || state.query) return;
         state.query = parseQuery(query);
         cm.removeOverlay(state.overlay, queryCaseInsensitive(state.query));
         state.overlay = searchOverlay(state.query, queryCaseInsensitive(state.query));
@@ -85,6 +83,24 @@
         state.posFrom = state.posTo = cm.getCursor();
         findNext(cm, rev);
       });
+    });
+    var prev_button  = document.getElementById('cm_search_prev');
+    var next_button  = document.getElementById('cm_search_next');
+
+    prev_button.onmousedown = prev_button.onselectstart = function() {
+      return false;
+    };
+    CodeMirror.on(prev_button, "click", function(e) {
+      e.preventDefault();
+      doSearch(cm, true);
+    });
+
+    next_button.onmousedown = next_button.onselectstart = function() {
+      return false;
+    };
+    CodeMirror.on(next_button, "click", function(e) {
+      e.preventDefault();
+      doSearch(cm, rev);
     });
   }
   function findNext(cm, rev) {cm.operation(function() {

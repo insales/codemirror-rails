@@ -41,7 +41,7 @@
 
     var dialog = dialogDiv(this, template, options.bottom);
     var closed = false, me = this;
-    function close(newVal) {
+    function close(newVal, root) {
       if (typeof newVal == 'string') {
         inp.value = newVal;
       } else {
@@ -55,6 +55,13 @@
     }
 
     var inp = dialog.getElementsByTagName("input")[0], button;
+    var close_button = document.getElementById('cm_search_close');
+    CodeMirror.on(close_button, "click", function(e) {
+      e.preventDefault();
+      close();
+    });
+
+
     if (inp) {
       if (options.value) {
         inp.value = options.value;
@@ -64,24 +71,20 @@
       if (options.onInput)
         CodeMirror.on(inp, "input", function(e) { options.onInput(e, inp.value, close);});
       if (options.onKeyUp)
-        CodeMirror.on(inp, "keyup", function(e) {options.onKeyUp(e, inp.value, close);});
+        CodeMirror.on(inp, "keyup", function(e) { options.onKeyUp(e, inp.value, close);});
 
       CodeMirror.on(inp, "keydown", function(e) {
         if (options && options.onKeyDown && options.onKeyDown(e, inp.value, close)) { return; }
         if (e.keyCode == 27 || (options.closeOnEnter !== false && e.keyCode == 13)) {
           inp.blur();
           CodeMirror.e_stop(e);
-          close();
         }
         if (e.keyCode == 13) callback(inp.value);
       });
 
-      if (options.closeOnBlur !== false) CodeMirror.on(inp, "blur", close);
-
       inp.focus();
     } else if (button = dialog.getElementsByTagName("button")[0]) {
       CodeMirror.on(button, "click", function() {
-        close();
         me.focus();
       });
 
